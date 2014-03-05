@@ -209,7 +209,7 @@
 			vim solr/home/collection1/core.properties
 			add:
 				solr.data.dir=/usr/local/project_name/data/solr/home/index
-		6. Create a Tomcat Context fragment to point docBase to the $SOLR_HOME/solr.war file and solr/home to $SOLR_HOME, the file name is solr-adsystem.xml:
+		6. Create a Tomcat Context fragment to point docBase to the $SOLR_HOME/solr.war file and solr/home to $SOLR_HOME, the file name is solr-project_name.xml:
 			<Context docBase="/usr/local/project_name/data/solr/war/solr-4.6.0.war" debug="0" crossContext="true">
 				<Environment name="solr/home" type="java.lang.String" value="/usr/local/project_name/data/solr/home" override="true"/>
 			</Context>
