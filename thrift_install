@@ -1,0 +1,18 @@
+================================================================
+install thrift-0.9.1 on 10.16.238.86 /data/project_name
+================================================================
+1. the tar ball thrift-0.9.1.tar.gz have some issue, so we check out source direct from git repository:
+	git clone https://git-wip-us.apache.org/repos/asf/thrift.git thrift
+2. ./bootstrap.sh
+	1) the autoconf version is low, so reinstall the autoconf
+		a) wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.68.tar.gz
+		b) tar xf autoconf-2.68.tar.gz
+		c) ./configure
+		d) make
+		e) make test
+		f) make install
+3. ./configure --prefix=/data/project_name/thrift-0.9.1 --with-boost=/usr/local
+4. when exec the make, there is a issue. resolve by exec(when install using the tar ball, not direct use the source code):
+	mv thrift-0.9.1/lib/cpp/src/thrift/qt/moc_TQTcpServer.cpp  thrift-0.9.1/lib/cpp/src/thrift/qt/moc_TQTcpServer.cpp.bak
+5. make
+6. make install
