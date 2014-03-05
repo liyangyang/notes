@@ -1,5 +1,5 @@
 ================================================================
-install thrift-0.9.1 on 10.16.238.86 /data/project_name
+install thrift-0.9.1 on ip /data/project_name
 ================================================================
 1. the tar ball thrift-0.9.1.tar.gz have some issue, so we check out source direct from git repository:
 	git clone https://git-wip-us.apache.org/repos/asf/thrift.git thrift
