@@ -1,0 +1,93 @@
+install nginx 1.4.2 in centos
+
+1. download nginx 1.4.2 from http://nginx.org/en/download.html
+2. download pcre library 8.2.0 from http://sourceforge.net/projects/pcre/files/pcre/8.20/
+3. download zlib 1.2.5 from http://sourceforge.net/projects/libpng/files/zlib/1.2.5/zlib-1.2.5.tar.gz/download?use_mirror=ncu&download=
+4. ./configure --prefix=/data/app_name/nginx --with-http_ssl_module --with-http_stub_status_module --with-pcre=../pcre-8.20 --with-zlib=../zlib-1.2.5
+5. make
+6. make install
+7. start nginx: 
+	cd /data/project_name/nginx/sbin
+	./nginx
+8. config nginx/conf/nginx.conf
+	change work connection: 
+		worker_connections  3000;
+	add charset conf: 
+		charset utf-8;
+	change location for project_path: 
+		location ~ /project_path/ {
+            proxy_pass http://ip:port;
+
+            root   html;
+            index  index.html index.htm;
+        }
+9. enable ssl
+	server {
+        listen       443;
+        server_name  localhost;
+
+        ssl                  on;
+        ssl_certificate      server.crt;
+        ssl_certificate_key  server.key;
+
+    #    ssl_session_timeout  5m;
+
+    #    ssl_protocols  SSLv2 SSLv3 TLSv1;
+    #    ssl_ciphers  HIGH:!aNULL:!MD5;
+    #    ssl_prefer_server_ciphers   on;
+
+        location ~ /amber/ {
+            proxy_pass http://ip:port;
+
+            root   html;
+            index  index.html index.htm;
+        }
+    }
+10. generate certificate file use openssl
+	see apache_ssl_config.txt
+11. add monitor location
+	location ~ /nginx_status {
+		stub_status on;
+		access_log  off;
+		allow       ip;
+		deny        all;
+	}
+12. fix /favicon.ico not found error, add below snip for 80 and 443 server
+	location = /favicon.ico {
+		return          204;
+		access_log      off;
+		log_not_found   off;
+	}
+13. change linux ulimit -n values, edit /etc/security/limits.conf  add two lines 
+	* soft nofile 655360 
+	* hard nofile 655360
+14. modify nginx/conf/nginx.conf, add: 
+	worker_rlimit_nofile 655360;
+15. modify nginx/conf/nginx.conf, add: 
+	proxy_connect_timeout  1800;
+    proxy_send_timeout  1800;
+    proxy_read_timeout  1800;
+16. add load blance: 1). add upstream 2). modify the proxy_pass.
+	1). 
+	upstream tomcatServers{
+        server ip:port;
+        server ip:port;
+    }
+	2).
+	location ~ /project_path/ {
+		proxy_pass http://ip:port;
+
+		root   html;
+		index  index.html index.htm;
+	}
+17. stop nginx
+	/sbin/./nginx -s stop
+	password: newegg
+18. make http and https all direct to load blance: proxy_pass http://tomcatServers;
+19. make nginx only reverse proxy /js/ location: 
+	location ~ /project_path/js/ {
+		proxy_pass http://tomcatServers;
+
+		root   html;
+		index  index.html index.htm;
+	}
