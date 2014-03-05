@@ -11,7 +11,7 @@
 	4. logfile ../data/redis.log
 	5. dir ../data/
 8. start redis-server with: ./redis-server ../redis.conf
-9. start redis-cli with: ./redis-cli -h 10.16.238.86
+9. start redis-cli with: ./redis-cli -h ip
 
 
 
