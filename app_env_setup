@@ -15,14 +15,14 @@
 			6. add tomcat manager account to $CATALINA_HOME/conf/tomcat-users.xml
 				<role rolename="manager-gui"/>
 				<user username="tomcat" password="s3cret" roles="manager-gui"/>
-			7. add amber.xml to $CATALINA_HOME/conf/Catalina/localhost/, with the content:
+			7. add project_name.xml to $CATALINA_HOME/conf/Catalina/localhost/, with the content:
 				<Context path="/project_name" reloadable="true" docBase="C:\Applications\project_name\war\project_name\">
 					<Logger className="org.apache.catalina.logger.SystemOutLogger" verbosity="4" timestamp="true"/>
 					<!--
 					<Valve className="org.apache.catalina.valves.RemoteAddrValve" allow="10\.16\.77\.\d+,10\.16\.202\.91" deny=""/>
 					-->
 				</Context>
-			8. put the amber deploy file to C:\Applications\project_name\war folder. The war file must be expanded.
+			8. put the project_name deploy file to C:\Applications\project_name\war folder. The war file must be expanded.
 		2. tomcat for solr
 			1. extract tomcat zip file: apache-tomcat-7.0.47-windows-x64.zip to apache-tomcat-7.0.47-solr
 			2. change name of $CATALINA_HOME/bin/tomcat7w.exe to $CATALINA_HOME/bin/project_nameServicew.exe
@@ -171,7 +171,7 @@
 			4. add tomcat manager account to $CATALINA_HOME/conf/tomcat-users.xml
 				<role rolename="manager-gui"/>
 				<user username="tomcat" password="s3cret" roles="manager-gui"/>
-			5. add amber.xml to $CATALINA_HOME/conf/Catalina/localhost/
+			5. add project_name.xml to $CATALINA_HOME/conf/Catalina/localhost/
 				<Context path="/project_name" reloadable="true" docBase="/usr/local/project_name/war/project_name/">
 					<Logger className="org.apache.catalina.logger.SystemOutLogger" verbosity="4" timestamp="true"/>
 					<!--
@@ -275,36 +275,3 @@
 1. domain authentication module on windows server only authenticate domain of this window server.  <== Resolved
 2. monitor email host is java.net.UnknownHostException: EMAIL_HOST_NAME  <== Resolved
 3. 
-
-	
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
