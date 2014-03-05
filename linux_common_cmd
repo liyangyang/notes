@@ -1,0 +1,99 @@
+1. 备份cassandra schema
+	echo -e "use keyspacename;\r\n show schema;\n" | cassandra-cli -h localhost > mySchema.cdl
+	-e参数表示解释\r\n
+2. 恢复cassandra schema
+	cassandra-cli -host 10.16.238.85 -port 9160 -f /root/temp/Schema_PublishWidget.cdl
+3. cassandra启动，查看是否启动和停止
+	启动：./cassandra
+	查看是否启动：ps auwx | grep cassandra
+	停止：sudo kill <pid>
+4. linux间传递文件 
+	scp LocalFilePath RemoteUser@RemoteIp:RemoteFilePath
+5. lsof是一个用来显示被打开的文件的强大有用的工具。 
+	如：lsof /etc/passwd 那个显示哪个进场占用/etc/passwd 
+	   lsof -t 'which httpd' 打印占用httpd可执行文件的进程的进程号 
+		lsof -c k 显示以k开头的进程名的进程号 
+		lsof -c courier -u ^mtv  显示courier开头的进程名且不属于mtv用户的进程号 
+		lsof +p 2112显示那些文件被2112进程打开 
+		lsof -D /tmp显示/tmp文件夹中打开的实例和文件的进程 
+		lsof -i 显示所有打开的端口 
+	
+	比如查看80端口被哪个程序占用：lsof -i tcp:80 -n
+	
+	netstat: 
+		netstat -pan|grep 2809查看2809端口 
+		netstat有如下参数： 
+	   -a:显示所有连接和监听接口 
+	   -b：显示包含于创建每个连接或监听端口的课执行组件 
+	-e：显示以太网统计信息 
+	-n：以数字形式显示地址和端口号 
+	-o：显示每个连接相关的所属进程ID 
+	-p：显示proto指定的协议的连接 
+	-r：显示路由表 
+	-s：显示按协议统计信息 
+	-v：与B选项一起使用时将显示包含于为所有可执行组件创建连接或监听端口的组建 
+	interval：重新显示选定统计信息，每次显示之间暂停时间间隔，ctro+c停止 
+6. 查看linux是否安装有httpd
+		rpm -q httpd
+		apachectl -v
+		apachectl -c
+7. 备份cassandra keyspace cql文件
+describe keyspace keyspacename
+8。回复cassandra keyspace from cql file
+sh /usr/local/cassandra/bin/cqlsh 10.16.238.85 < CQL_PublishWidget.cql 
+9. 查看linux磁盘分区
+	df
+	fdisk -l
+10. linux简单复制文件
+	cp FromDirectory ToDirectory
+11. linux解压压缩的包(gz格式用z参数，bzip格式用j参数)：
+	tar -zxvf file.tar.gz
+12. linux查询ant是否安装
+	rpm -q ant
+13. linux升级ant
+14. 杀死一个进程先用kill -15 pid(正常终止)，不行再用kill -9 pid(暴力杀死)
+15。列出已经安装软件 rpm -qa 或 yum list installed
+	rpm查询依赖数 rpm -q --whatrequires name
+	rpm更新 rpm -Fvh name.rpm
+	src.rpm编译 rpmbuild --rebuild name.src.rpm   
+16. 察看系统内存使用:
+	top
+	free -m
+	cat /proc/meminfo
+17. 刷新内存,减小cached内存的容量
+	sync
+	echo "1" > /proc/sys/vm/drop_caches
+18. 查询多个单词
+	egrep -w 'word1|word2' /path/to/file
+19. 察看linux的版本
+	cat /etc/redhat-release
+20. tail追踪文件追加的内容
+	tail -f filename
+21. linux修改时间
+	date -s "20100405 14:31:00"
+22. RPM之.rpmmacros文件
+	建立～/.rpmmacros  文件  是存储各种宏定义 ，比如_topdir宏的值来自定义打包路径
+	echo "%_topdir $HOME/rpmbuild" > ~/.rpmmacros   
+	相当于在.rpm文件中写入%_topdir $HOME/rpmbuild即定义%_topdir  为路径$HOME/rpmbuild
+23. mkdir -p /nfs
+	-p, --parents	no error if existing, make parent directories as needed
+24. rpmbuild -ta memcached-1.x.x.tar.gz
+	-ta	build source and binary packages from <tarball>
+25. yum update softwarename
+26. rpm -e softwarename
+27. 查找软件的配置文件
+	rpm -q softwarename -c
+28. 察看linux内核版本
+	cat /proc/version
+	uname -a
+29. 复制文件夹
+	cp -av source destination
+30. 察看软件相关的所有文件
+	rpm -ql softwarename
+31. pscp命令中目录使用*时，代表该目录下的所有文件，但不包括子目录。 如果同时使用-r和*，代表复制某目录下的所有文件及子目录，如果只使用-r则会提示要复制.和..目录，出现问题。
+32. 配置JAVA_HOME,PATH,CLASSPATH在~/.bash.profile,配置好后,为了让配置生效,可以运行:
+	source ~/.bash_profile  或  . ~/.bash_profile
+33. 在vim中插入某命令运行的结果：
+	:read !command
+	比如，插入当前的日期:
+	:read !date
