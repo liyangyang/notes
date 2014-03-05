@@ -19,7 +19,7 @@ solr install
 	</Context>
 	
 	Symlink or place the file in $CATALINA_HOME/conf/Catalina/localhost/solr-project_name.xml, where Tomcat will automatically pick it up. 
-7. modify the schema.xml in /data/project_name/solr/home/collection1/conf/, and fields of adsystem.
+7. modify the schema.xml in /data/project_name/solr/home/collection1/conf/, and fields of project_name.
 	
 	
 	
@@ -32,7 +32,7 @@ solr master/slave configure
 1. follow "solr install", set up solr env on a window(master) and linux(repeater) server.
 2. use rsync to archive tomcat and solr related folder to other two linux(slave) servers.
 	rsync -a /data/apache-tomcat-7.0.42-solr user@ip:/data/
-	rsync -a /data/adsystem user@ip:/data/
+	rsync -a /data/project_name user@ip:/data/
 3. modify the solrconfig.xml of master. we set variable name in solrconfig.xml and custom variable value in core.properties, so that we can replicate solrconfig.xml
 	<requestHandler name="/replication" class="solr.ReplicationHandler" > 
 	<!--
