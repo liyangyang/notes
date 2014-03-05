@@ -1,0 +1,47 @@
+1. Generate certificate files use openssl.exe in apache/bin/ and apache/conf/openssl.cnf   (pass phrase: password)
+	1. openssl genrsa -des3 -out server.key 1024   	
+	2. openssl rsa -in server.key -out server.pem	
+	3. openssl req -new -config ../conf/openssl.cnf -key server.key -out server.csr
+		Country Name (2 letter code) [AU]:US
+		State or Province Name (full name) [Some-State]:not know
+		Locality Name (eg, city) []:
+		Organization Name (eg, company) [Internet Widgits Pty Ltd]:personal
+		Organizational Unit Name (eg, section) []:unit
+		Common Name (eg, YOUR name) []:niko
+		Email Address []:
+
+		Please enter the following 'extra' attributes
+		to be sent with your certificate request
+		A challenge password []:
+		An optional company name []:
+	4. openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
+2. Copy server.pem and server.crt to apache/conf/
+3. Edit httpd.conf and related files
+	1. uncomments below lines:
+		#Loadmodule ssl_module modules/mod_ssl.so
+		#LoadModule rewrite_module modules/mod_rewrite.so (this rewrite module should not use, it have security issue. we add this module because we want rewrite http to https, now it's not needed, so we don't need this module)
+		#Include conf/extra/httpd-ssl.conf
+	2. edit conf/extra/httpd-ssl.conf
+		Change (all one line): 
+		SSLCertificateKeyFile C:/Program Files/Apache Software Foundation/Apache2.2/conf/server.key 
+		To (all one line): 
+		SSLCertificateKeyFile "C:/Program Files/Apache Software Foundation/Apache2.2/conf/server.pem"
+4. Now, https access is allowed.
+5. Edit <Location /> to rewrite http to https for specificed url (this step is not need. It's used for rewrite http request to https, now it's not needed.)
+	<Location ~ "/path/js/render">
+		RewriteEngine on
+		RewriteCond %{HTTPS} !=on
+		RewriteRule ^.*$ https://%{SERVER_NAME}%{REQUEST_URI} [L,R]
+	</Location>
+
+	
+	
+Issues:
+1. The following error may be encountered in the error.log file on a 64-bit version of Windows with the 32-bit version of Apache:
+		Syntax error on line 62 of C:/Program Files (x86)/Apache Software Foundation/Apache2.2/conf/extra/httpd-ssl.conf:
+		SSLSessionCache: Invalid argument: size has to be >= 8192 bytes
+	Due to a parser error the "(x86)" in the path is mistakenly found when looking for the bracketed cache size parameter at the end.
+	A less complex alternative is to use the 8.3 compatible short name for "Program Files (x86)" which can be found by running:
+	dir /x c:\
+	The short name will probably look like "PROGRA~2". The offending line can then be changed to:
+	SSLSessionCache "shmcb:C:/PROGRA\~2/Apache Software Foundation/Apache2.2/logs/ssl_scache(512000)"
