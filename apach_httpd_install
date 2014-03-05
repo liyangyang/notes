@@ -1,0 +1,71 @@
+1. download install file: httpd-2.2.25-win32-x86-openssl-0.9.8y.msi
+2. install httpd, for all user, on port 80.
+3. uncomments below modules:
+	mod_proxy.so
+	mod_proxy_ajp.so
+	mod_ssl.so
+4. add below module:
+	LoadModule sspi_auth_module modules/mod_auth_sspi.so
+5. add below:
+	# -------------------------------
+	# Add at 2013-07-24
+	# -------------------------------
+
+	<Location ~ "/path/js/.*">
+		allow from all
+		satisfy any
+	</Location>
+
+	<Location ~ "/path/jsdemo/.*">
+		allow from all
+		satisfy any
+	</Location>
+
+	<Location ~ "/path/.*">
+		Options -Indexes
+		Order allow,deny
+		allow from all
+
+		AuthName "Auth Name"
+		AuthType SSPI
+		SSPIAuth On
+		#SSPIOfferSSPI On
+		#SSPIBasicPreferred Off # should basic authentication have higher priority
+		SSPIAuthoritative On
+		SSPIOfferBasic On      # let non-IE clients authenticate
+		#SSPIDomain "aaa.bbb.corp"
+		#SSPIDomain "bbb.corp"
+		#SSPIPerRequestAuth On
+
+		require valid-user
+	</Location>
+
+	ProxyPass /path/ ajp://127.0.0.1:10009/path/
+	ProxyPassReverse /path/ ajp://127.0.0.1:10009/path/
+6. 	copy mod_auth_sspi.so to modules/ folder
+7. uncomment 
+	Loadmodule ssl_module modules/mod_ssl.so
+	Include conf/extra/httpd-ssl.conf
+8. modify conf/extra/httpd-ssl.conf
+	a). change
+		SSLCertificateKeyFile "C:/Program Files (x86)/Apache Software Foundation/Apache2.2/conf/server.key"
+		to
+		SSLCertificateKeyFile "C:/Program Files (x86)/Apache Software Foundation/Apache2.2/conf/server.pem"
+	b). change
+		SSLSessionCache        "shmcb:C:/Program Files (x86)/Apache Software Foundation/Apache2.2/logs/ssl_scache(512000)"
+		to
+		SSLSessionCache        "shmcb:C:/PROGRA\~2/Apache Software Foundation/Apache2.2/logs/ssl_scache(512000)"
+9. copy server.pem and server.crt to conf/
+10. to make domain authentication work, edit tomcat/conf/server.xml, add tomcatAuthentication="false" attribute to ajp connector
+
+
+=========================================================================================================================
+
+
+1. 关于Apache SSPI的相关配置
+	SSPIOfferSSPI   SSPI中的组件在验证失败时，是否将请求转交给其他组件进行验证。当开启这个功能时，如果都验证失败，会在各个组件间循环转发验证请求。
+	SSPIAuthoritative	SSPI中的组件验证失败时，是否将请求转交给其他组件，当所有组件都失败时，验证失败。
+	SSPIOfferBasic	SSPI是否提供Basic Auth功能，当SSPI验证失败时，采用Basic Auth验证。
+	SSPIBasicPreferred	优先采用Basic Auth验证，再使用SSPI验证。
+2. verify if sslv2 is disabled
+	use openssl, and command is: s_client -connect host:443 -ssl2
