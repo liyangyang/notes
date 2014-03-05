@@ -10,7 +10,7 @@
 6. install using the build rpm: memcached-1.4.15-1.el6.x86_64.rpm
 	rpm -ivh memcached-1.4.15-1.el6.x86_64.rpm
 7. start memcached
-	memcached -d -p 11211 -u nobody -m 1024 -c 1024 -P /data/memcached/memcached.pid -l 10.16.238.85 -vvv >>/data/memcached/memcached.log 2>&1
+	memcached -d -p 11211 -u nobody -m 1024 -c 1024 -P /data/memcached/memcached.pid -l ip -vvv >>/data/memcached/memcached.log 2>&1
 
 
 
