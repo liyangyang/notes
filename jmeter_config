@@ -1,0 +1,11 @@
+1. config jmeter to make it log response data in command line mode
+	1. generate jmx file in gui mode
+	2. specify "Functional Test Mode" to true on the Test Plan element in jmx file or check the checkbox of Functional Test Mode in gui mode
+	3. set the property of jmeter.save.saveservice.output_format=xml in jmeter.properties
+2. config jmeter to use proxy server in gui mode
+	1. set the http request implementation to Java for sample
+	2. set proxy server info, for example:
+		Server Name or IP: proxy_server_name
+		Port number: port_number
+		User Name: user_name
+		Password: password of user
