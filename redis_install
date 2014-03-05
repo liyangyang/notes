@@ -7,7 +7,7 @@
 7. config redis.conf
 	1. daemonize yes
 	2. pidfile ../data/redis.pid
-	3. bind 10.16.238.86
+	3. bind ip
 	4. logfile ../data/redis.log
 	5. dir ../data/
 8. start redis-server with: ./redis-server ../redis.conf
