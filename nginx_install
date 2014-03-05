@@ -36,7 +36,7 @@ install nginx 1.4.2 in centos
     #    ssl_ciphers  HIGH:!aNULL:!MD5;
     #    ssl_prefer_server_ciphers   on;
 
-        location ~ /amber/ {
+        location ~ /project_path/ {
             proxy_pass http://ip:port;
 
             root   html;
@@ -82,7 +82,7 @@ install nginx 1.4.2 in centos
 	}
 17. stop nginx
 	/sbin/./nginx -s stop
-	password: newegg
+	password: password
 18. make http and https all direct to load blance: proxy_pass http://tomcatServers;
 19. make nginx only reverse proxy /js/ location: 
 	location ~ /project_path/js/ {
