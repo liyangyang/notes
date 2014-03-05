@@ -159,7 +159,7 @@
 			source ~/.bash_profile
 	2. tomcat
 		1. for project_name
-			1. unpompress apache-tomcat-7.0.47.tar.gz to /usr/local/adsystem/server/apache-tomcat-7.0.47-project_name
+			1. unpompress apache-tomcat-7.0.47.tar.gz to /usr/local/project_name/server/apache-tomcat-7.0.47-project_name
 			2. create setenv.sh under $CATALINA_HOME/bin/
 				export CATALINA_OPTS="-Xms2048M -Xmx2048M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -Djava.rmi.server.hostname=ip -Dcom.sun.management.jmxremote.port=port -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
 			3. modify $CATALINA_HOME/conf/server.xml
@@ -195,8 +195,8 @@
 					redirect port from 8443 to 8444
 			4. add tomcat manager account to $CATALINA_HOME/conf/tomcat-users.xml
 				<role rolename="manager-gui"/>
-				<user username="adsystem" password="adsystem" roles="manager-gui"/>
-			5. add solr-adsystem.xml to $CATALINA_HOME/conf/Catalina/localhost/
+				<user username="tomcat" password="s3cret" roles="manager-gui"/>
+			5. add solr-project_name.xml to $CATALINA_HOME/conf/Catalina/localhost/
 				<Context docBase="/usr/local/project_name/data/solr/war/solr-4.6.0.war" debug="0" crossContext="true">
 					<Environment name="solr/home" type="java.lang.String" value="/usr/local/project_name/data/solr/home" override="true"/>
 				</Context>
@@ -245,7 +245,7 @@
 			2. for slave of E3(ip)/E4(ip)
 				enable.master=false
 				enable.slave=true
-				replicate.master.url=http://ip:port/solr-adsystem
+				replicate.master.url=http://ip:port/solr-project_name
 	4. rsync config data from E3 to other E3/E4 servers
 		1. rsync /usr/local/project_name total, ~/.bash_profile. For example ip:
 			sudo rsync -a --rsync-path="sudo rsync" ~/.bash_profile user@ip:~/
