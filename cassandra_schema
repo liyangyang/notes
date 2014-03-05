@@ -2,7 +2,7 @@
 	echo -e "use keyspacename;\r\n show schema;\n" | cassandra-cli -h localhost > mySchema.cdl
 	-e参数表示解释\r\n
 2. 恢复cassandra schema
-	cassandra-cli -host 10.16.238.85 -port 9160 -f /root/temp/Schema_PublishWidget.cdl
+	cassandra-cli -host ip -port 9160 -f /root/temp/Schema.cdl
 3. change row_cache_provider from ConcurrentLinkedHashCacheProvider to SerializingCacheProvider
 	use SerializingCacheProvider need jna lib in cassandra classpath. so we copy /usr/share/java/jna-3.5.1.jar to $CASSANDRA_HOME/lib/
 	this need to restart cassandra
