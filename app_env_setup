@@ -1,0 +1,310 @@
+1. server 1(windows 2008)
+	1. java
+		1. install jdk-7u40-windows-x64.exe as default
+		2. add system variables
+			JAVA_HOME		C:\Program Files\Java\jdk1.7.0_40
+			PATH			;C:\Program Files\Java\jdk1.7.0_40\bin
+			CLASS_PATH		.;C:\Program Files\Java\jdk1.7.0_40\lib\dt.jar;C:\Program Files\Java\jdk1.7.0_40\lib\tools.jar
+	2. tomcat
+		1. tomcat for project_name
+			1. extract tomcat zip file: apache-tomcat-7.0.47-windows-x64.zip to apache-tomcat-7.0.47-project_name
+			2. change name of $CATALINA_HOME/bin/tomcat7w.exe to $CATALINA_HOME/bin/project_nameAppServicew.exe
+			3. run cmd as administrator, and cd to $CATALINA_HOME/bin, and run "service install project_nameAppService"
+			4. change tomcat service startup type to Automatic
+			5. edit $CATALINA_HOME/conf/server.xml, and tomcatAuthentication="false" attribute to ajp connector
+			6. add tomcat manager account to $CATALINA_HOME/conf/tomcat-users.xml
+				<role rolename="manager-gui"/>
+				<user username="tomcat" password="s3cret" roles="manager-gui"/>
+			7. add amber.xml to $CATALINA_HOME/conf/Catalina/localhost/, with the content:
+				<Context path="/project_name" reloadable="true" docBase="C:\Applications\project_name\war\project_name\">
+					<Logger className="org.apache.catalina.logger.SystemOutLogger" verbosity="4" timestamp="true"/>
+					<!--
+					<Valve className="org.apache.catalina.valves.RemoteAddrValve" allow="10\.16\.77\.\d+,10\.16\.202\.91" deny=""/>
+					-->
+				</Context>
+			8. put the amber deploy file to C:\Applications\project_name\war folder. The war file must be expanded.
+		2. tomcat for solr
+			1. extract tomcat zip file: apache-tomcat-7.0.47-windows-x64.zip to apache-tomcat-7.0.47-solr
+			2. change name of $CATALINA_HOME/bin/tomcat7w.exe to $CATALINA_HOME/bin/project_nameServicew.exe
+			3. run cmd as administrator, and cd to $CATALINA_HOME/bin, and run "service install project_nameService"
+			4. change tomcat service startup type to Automatic
+			5. modify $CATALINA_HOME/conf/server.xml:
+				Server port from 8005 to 8006
+				Http connector port from 8080 to 8081
+				Ajp connector port from 8009 to 8010
+				redirect port from 8443 to 8444
+			6. add tomcat manager account to $CATALINA_HOME/conf/tomcat-users.xml
+				<role rolename="manager-gui"/>
+				<user username="tomcat" password="s3cret" roles="manager-gui"/>
+	3. solr
+		1. make dir home and war under folder C:\Applications\project_name\data\solr
+		2. copy solr-4.6.0/dist/solr-4.6.0.war to war folder
+		3. copy solr-4.6.0/example/solr/* to home folder
+		4. copy solr-4.6.0/example/lib/ext/* tomcat-solr/lib/
+		5. change solr index store dir.
+			vim solr/home/collection1/core.properties
+			add:
+				solr.data.dir=C:\Applications\project_name\data\solr\home\index
+		6. Create a Tomcat Context fragment to point docBase to the $SOLR_HOME/solr.war file and solr/home to $SOLR_HOME, the file name is solr-project_name.xml:
+			<Context docBase="C:\Applications\project_name\data\solr\war\solr-4.6.0.war" debug="0" crossContext="true">
+				<Environment name="solr/home" type="java.lang.String" value="C:\Applications\project_name\data\solr\home" override="true"/>
+			</Context>
+		7. modify the schema.xml in /data/project_name/solr/home/collection1/conf/, and fields of project_name.
+		8. config master/slave for solr
+			1. modify the solr/home/collection1/conf/solrconfig.xml, change the replication requestHandler to:
+				<requestHandler name="/replication" class="solr.ReplicationHandler" > 
+					<!--
+						To enable simple master/slave replication, uncomment one of the 
+						sections below, depending on whether this solr instance should be
+						the "master" or a "slave".  If this instance is a "slave" you will 
+						also need to fill in the masterUrl to point to a real machine.
+					-->
+						<lst name="master">
+							<str name="enable">${enable.master:false}</str>
+							<str name="replicateAfter">commit</str>
+							<str name="replicateAfter">startup</str>
+							<str name="replicateAfter">optimize</str>
+							<str name="confFiles">schema.xml,solrconfig.xml</str>
+						</lst>
+
+						<lst name="slave">
+							<str name="enable">${enable.slave:false}</str>
+							<str name="masterUrl">${replicate.master.url:http://ip:port/solr-project_name}</str>
+							<str name="pollInterval">00:00:60</str>
+						</lst>
+				</requestHandler>
+		9. modify the solr/home/collection1/core.propreties, add:
+			enable.master=true
+			enable.slave=false
+	4. httpd
+		1. install httpd use httpd-2.2.25-win32-x86-openssl-0.9.8y.msi
+		2. basic config
+			1. uncomments below modules
+				mod_proxy.so
+				mod_proxy_ajp.so
+			2. add below module:
+				LoadModule sspi_auth_module modules/mod_auth_sspi.so
+			3. copy mod_auth_sspi.so to modules/ folder
+			4. add below:
+				<Location ~ "/project_name/js/.*">
+					allow from all
+					satisfy any
+				</Location>
+
+				<Location ~ "/project_name/jsdemo/.*">
+					allow from all
+					satisfy any
+				</Location>
+
+				<Location ~ "/.*">
+					Options -Indexes
+					Order allow,deny
+					allow from all
+
+					AuthName "project_name"
+					AuthType SSPI
+					SSPIAuth On
+					#SSPIOfferSSPI On
+					#SSPIBasicPreferred Off # should basic authentication have higher priority
+					SSPIAuthoritative On
+					SSPIOfferBasic On      # let non-IE clients authenticate
+					#SSPIDomain "aaa.bbb.corp"
+					#SSPIDomain "bbb.corp"
+					#SSPIPerRequestAuth On
+
+					require valid-user
+				</Location>
+
+				ProxyPass /project_name/ ajp://ip:port/project_name/
+				ProxyPassReverse /project_name/ ajp://ip:port/project_name/
+				
+				ProxyPass / ajp://ip:port/project_name/
+				ProxyPassReverse / ajp://ip:port/project_name/
+		3. ssl config
+			1. basic, enable ssl access
+				1. uncomment below modules:
+					Loadmodule ssl_module modules/mod_ssl.so
+					Include conf/extra/httpd-ssl.conf
+				2. modify conf/extra/httpd-ssl.conf
+					a). change
+						SSLCertificateKeyFile "C:/Program Files (x86)/Apache Software Foundation/Apache2.2/conf/server.key"
+						to
+						SSLCertificateKeyFile "C:/Program Files (x86)/Apache Software Foundation/Apache2.2/conf/server.pem"
+					b). change
+						SSLSessionCache        "shmcb:C:/Program Files (x86)/Apache Software Foundation/Apache2.2/logs/ssl_scache(512000)"
+						to
+						SSLSessionCache        "shmcb:C:/PROGRA\~2/Apache Software Foundation/Apache2.2/logs/ssl_scache(512000)"
+				3. copy server.pem and server.crt to conf/
+			
+==========================================================================================================================
+
+2. E3 and E4(Linux)
+	1. java
+		1. mkdir /usr/local/project_name
+		2. mkdir /usr/local/project_name/installer, /usr/local/project_name/server, /usr/local/project_name/data, /usr/local/project_name/war
+		3. copy jdk-7u40-linux-x64.gz to /usr/local/project_name/server/
+		4. tar -zxvf jdk-7u40-linux-x64.gz
+		5. modify ~/.bash_profile
+			1. append PATH, add JAVA_HOME and CLASSPATH:
+				PATH=$PATH:/root/bin:/sbin:/usr/sbin:/usr/script:/usr/local/project_name/server/jdk1.7.0_40/bin
+
+				CLASSPATH=.:/usr/local/project_name/server/jdk1.7.0_40/lib/dt.jar:/usr/local/project_name/server/jdk1.7.0_40/lib/tools.jar
+
+				JAVA_HOME=/usr/local/project_name/server/jdk1.7.0_40
+
+				export PATH
+				export CLASSPATH
+				export JAVA_HOME
+		6. make new env variable work
+			source ~/.bash_profile
+	2. tomcat
+		1. for project_name
+			1. unpompress apache-tomcat-7.0.47.tar.gz to /usr/local/adsystem/server/apache-tomcat-7.0.47-project_name
+			2. create setenv.sh under $CATALINA_HOME/bin/
+				export CATALINA_OPTS="-Xms2048M -Xmx2048M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -Djava.rmi.server.hostname=ip -Dcom.sun.management.jmxremote.port=port -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+			3. modify $CATALINA_HOME/conf/server.xml
+				1. comment old basic http connector
+				2. add http nio connector
+					<Connector port="80" protocol="org.apache.coyote.http11.Http11NioProtocol"
+					   connectionTimeout="20000"
+					   redirectPort="8443" maxConnections="3000" maxThreads="3000" minSpareThreads="3000" maxSpareThreads="3000" enableLookups="false"/>
+			4. add tomcat manager account to $CATALINA_HOME/conf/tomcat-users.xml
+				<role rolename="manager-gui"/>
+				<user username="tomcat" password="s3cret" roles="manager-gui"/>
+			5. add amber.xml to $CATALINA_HOME/conf/Catalina/localhost/
+				<Context path="/project_name" reloadable="true" docBase="/usr/local/project_name/war/project_name/">
+					<Logger className="org.apache.catalina.logger.SystemOutLogger" verbosity="4" timestamp="true"/>
+					<!--
+					<Valve className="org.apache.catalina.valves.RemoteAddrValve" allow="10\.16\.77\.\d+,10\.16\.202\.91" deny=""/>
+					-->
+				</Context>
+		2. for solr
+			1. unpompress apache-tomcat-7.0.47.tar.gz to /usr/local/project_name/server/apache-tomcat-7.0.47-solr
+			2. create setenv.sh under $CATALINA_HOME/bin/
+				export CATALINA_OPTS="-Xms2048M -Xmx2048M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -Djava.rmi.server.hostname=10.16.232.11 -Dcom.sun.management.jmxremote.port=10011 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+			3. modify $CATALINA_HOME/conf/server.xml
+				1. comment old basic http connector
+				2. add http nio connector
+					<Connector port="8081" protocol="org.apache.coyote.http11.Http11NioProtocol"
+					   connectionTimeout="20000"
+					   redirectPort="8444" maxConnections="3000" maxThreads="3000" minSpareThreads="3000" maxSpareThreads="3000" enableLookups="false"/>
+				3. change port:
+					Server port from 8005 to 8006
+					Http connector port from 8080 to 8081
+					Ajp connector port from 8009 to 8010
+					redirect port from 8443 to 8444
+			4. add tomcat manager account to $CATALINA_HOME/conf/tomcat-users.xml
+				<role rolename="manager-gui"/>
+				<user username="adsystem" password="adsystem" roles="manager-gui"/>
+			5. add solr-adsystem.xml to $CATALINA_HOME/conf/Catalina/localhost/
+				<Context docBase="/usr/local/project_name/data/solr/war/solr-4.6.0.war" debug="0" crossContext="true">
+					<Environment name="solr/home" type="java.lang.String" value="/usr/local/project_name/data/solr/home" override="true"/>
+				</Context>
+	3. solr
+		1. make dir home and war under folder /usr/local/project_name/data/solr/
+		2. copy solr-4.6.0/dist/solr-4.6.0.war to war folder
+		3. copy solr-4.6.0/example/solr/* to home folder
+		4. copy solr-4.6.0/example/lib/ext/* tomcat-solr/lib/
+		5. change solr index store dir.
+			vim solr/home/collection1/core.properties
+			add:
+				solr.data.dir=/usr/local/project_name/data/solr/home/index
+		6. Create a Tomcat Context fragment to point docBase to the $SOLR_HOME/solr.war file and solr/home to $SOLR_HOME, the file name is solr-adsystem.xml:
+			<Context docBase="/usr/local/project_name/data/solr/war/solr-4.6.0.war" debug="0" crossContext="true">
+				<Environment name="solr/home" type="java.lang.String" value="/usr/local/project_name/data/solr/home" override="true"/>
+			</Context>
+		7. the schema.xml in /usr/local/project_name/solr/home/collection1/conf/ is not need to change, it will sync from master
+		8. config master/slave for solr
+			1. modify the solr/home/collection1/conf/solrconfig.xml, change the replication requestHandler to:
+				<requestHandler name="/replication" class="solr.ReplicationHandler" > 
+					<!--
+						To enable simple master/slave replication, uncomment one of the 
+						sections below, depending on whether this solr instance should be
+						the "master" or a "slave".  If this instance is a "slave" you will 
+						also need to fill in the masterUrl to point to a real machine.
+					-->
+						<lst name="master">
+							<str name="enable">${enable.master:false}</str>
+							<str name="replicateAfter">commit</str>
+							<str name="replicateAfter">startup</str>
+							<str name="replicateAfter">optimize</str>
+							<str name="confFiles">schema.xml,solrconfig.xml</str>
+						</lst>
+
+						<lst name="slave">
+							<str name="enable">${enable.slave:false}</str>
+							<str name="masterUrl">${replicate.master.url:http://ip:port/solr-project_name}</str>
+							<str name="pollInterval">00:00:60</str>
+						</lst>
+					</requestHandler>
+		9. modify the solr/home/collection1/core.propreties, add:
+			1. for repeater of E3(ip)/E4(ip)
+				enable.master=true
+				enable.slave=true
+				replicate.master.url=http://ip:port/solr-project_name
+			2. for slave of E3(ip)/E4(ip)
+				enable.master=false
+				enable.slave=true
+				replicate.master.url=http://ip:port/solr-adsystem
+	4. rsync config data from E3 to other E3/E4 servers
+		1. rsync /usr/local/project_name total, ~/.bash_profile. For example ip:
+			sudo rsync -a --rsync-path="sudo rsync" ~/.bash_profile user@ip:~/
+			sudo rsync -a --rsync-path="sudo rsync" /usr/local/project_name user@ip:/usr/local/
+			
+			source ~/.bash_profile
+			
+		2. modify the core.properties for solr slaves except repeater
+			1. for E3(ip)
+				enable.master=false
+				enable.slave=true
+				replicate.master.url=http://ip:port/solr-project_name
+			2. for E4(ip)
+				enable.master=false
+				enable.slave=true
+				replicate.master.url=http://ip:port/solr-project_name
+		3. modify the spring.profiles.active to e4slave in project_name/web.xml for E4 servers E4(ip)
+	5. nginx
+		not needed
+	6. linux optimize
+		1. change linux ulimit -n values, edit /etc/security/limits.conf  add two lines 
+			* soft nofile 655360 
+			* hard nofile 655360
+
+
+===========================================================================================================================
+1. domain authentication module on windows server only authenticate domain of this window server.  <== Resolved
+2. monitor email host is java.net.UnknownHostException: EMAIL_HOST_NAME  <== Resolved
+3. 
+
+	
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
