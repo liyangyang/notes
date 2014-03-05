@@ -2,7 +2,7 @@
 	echo -e "use keyspacename;\r\n show schema;\n" | cassandra-cli -h localhost > mySchema.cdl
 	-e参数表示解释\r\n
 2. 恢复cassandra schema
-	cassandra-cli -host 10.16.238.85 -port 9160 -f /root/temp/Schema_PublishWidget.cdl
+	cassandra-cli -host ip -port 9160 -f /root/temp/Schema.cdl
 3. cassandra启动，查看是否启动和停止
 	启动：./cassandra
 	查看是否启动：ps auwx | grep cassandra
@@ -40,7 +40,7 @@
 7. 备份cassandra keyspace cql文件
 describe keyspace keyspacename
 8。回复cassandra keyspace from cql file
-sh /usr/local/cassandra/bin/cqlsh 10.16.238.85 < CQL_PublishWidget.cql 
+sh /usr/local/cassandra/bin/cqlsh 10.16.238.85 < CQL_project_name.cql 
 9. 查看linux磁盘分区
 	df
 	fdisk -l
