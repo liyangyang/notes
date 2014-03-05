@@ -1,0 +1,28 @@
+1. download memcached-1.4.15.tar.gz
+2. install libevent-devel
+	yum install libevent-devel
+3. configure the place folder for the result of rpmbuild
+	echo "%_topdir /root/rpmbuild" >> ~/.rpmmacros
+4. create folder for rpmbuild result
+	mkdir -p /root/rpmbuild/{SPECS,BUILD,SRPMS,RPMS,SOURCES}
+5. build the source tar
+	rpmbuild -ta memcached-1.x.x.tar.gz
+6. install using the build rpm: memcached-1.4.15-1.el6.x86_64.rpm
+	rpm -ivh memcached-1.4.15-1.el6.x86_64.rpm
+7. start memcached
+	memcached -d -p 11211 -u nobody -m 1024 -c 1024 -P /data/memcached/memcached.pid -l 10.16.238.85 -vvv >>/data/memcached/memcached.log 2>&1
+
+
+
+
+
+=================================================
+Note:
+=================================================
+1. rpm -e memcached-1.4.15-1.el6.x86_64
+2. when use telnet communicate with memcached, we cann't modify the command when input. if do some modify operation(e.g. delete and input again), the command will be error.
+3. the different between "service memcached start" and "memcached" with parameters.
+	1) start using "service memcached start"
+		wo can define the start parameters in /etc/sysconfig/memcached. but we can not redirect the output log. this may be used in production env.
+	2) start using "memcached" with parameters
+		we need to add all parameters after memcached cmd, the type will NOT load parameters in /etc/sysconfig/memcached. and we can redirect the output log. this may be used in development env.
