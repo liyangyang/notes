@@ -1,0 +1,10 @@
+1. add setenv.sh in /bin, add:
+	export CATALINA_OPTS="-Xms2048M -Xmx2048M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -Djava.rmi.server.hostname=ip -Dcom.sun.management.jmxremote.port=port -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+2. set max connections and max threads attribute for http connector and https connector:
+	<Connector port="8080" protocol="org.apache.coyote.http11.Http11NioProtocol"
+               connectionTimeout="20000"
+               redirectPort="8443" maxConnections="3000" maxThreads="3000" minSpareThreads="3000" maxSpareThreads="3000" enableLookups="false"/>
+3. take care the memory leak of StandardSession, the session default expire date is half hour, in this period, the session object stay in memory and not release, then cause memory exhausted.	
+4. add manager account
+	<role rolename="manager-gui"/>
+	<user username="tomcat" password="s3cret" roles="manager-gui"/>
